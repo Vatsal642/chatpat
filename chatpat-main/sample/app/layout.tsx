@@ -1,6 +1,6 @@
 import './globals.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Providers from './providers';
+import { AuthProvider } from './providers';
 import type { ReactNode } from 'react';
 
 export const metadata = {
@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );
