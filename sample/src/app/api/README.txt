@@ -1,0 +1,1 @@
+This folder contains App Router API routes: Auth0 and tRPC.
