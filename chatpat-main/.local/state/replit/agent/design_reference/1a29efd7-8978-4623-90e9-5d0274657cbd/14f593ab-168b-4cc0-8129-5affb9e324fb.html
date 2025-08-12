@@ -1,0 +1,585 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatAI - Mobile Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'chat-green': '#10a37f',
+                    'chat-dark': '#343541',
+                    'chat-light': '#f7f7f8',
+                    'user-bg': '#e3f2fd',
+                    'ai-bg': '#f8f9fa'
+                },
+                fontFamily: {
+                    'inter': ['Inter', 'sans-serif']
+                }
+            }
+        }
+    };
+    </script>
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .chat-container {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden;
+        }
+        
+        .messages-container {
+            height: calc(100vh - 140px);
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+        
+        .message-bubble {
+            max-width: 85%;
+            word-wrap: break-word;
+            animation: fadeInUp 0.3s ease-out;
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: auto;
+            border-radius: 18px 18px 4px 18px;
+        }
+        
+        .ai-message {
+            background: #f8f9fa;
+            color: #212529;
+            border: 1px solid #e9ecef;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        .typing-indicator {
+            background: #f8f9fa;
+            border-radius: 18px;
+            padding: 12px 16px;
+            margin: 8px 0;
+            max-width: 80px;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #6c757d;
+            animation: typingDot 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typingDot {
+            0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+            40% { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        
+        .send-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: 1050;
+        }
+        
+        .sidebar.show {
+            transform: translateX(0);
+        }
+        
+        .overlay {
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .chat-item {
+            border-radius: 8px;
+            transition: background-color 0.2s ease;
+        }
+        
+        .chat-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .generated-image {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Mobile Header -->
+    <header class="bg-white border-bottom position-sticky top-0" style="z-index: 1040;">
+        <div class="d-flex align-items-center justify-content-between p-3">
+            <button class="btn btn-link p-0 text-dark" id="sidebarToggle">
+                <i class="fas fa-bars fs-5"></i>
+            </button>
+            <h1 class="h5 mb-0 fw-semibold">ChatAI</h1>
+            <div class="d-flex align-items-center gap-2">
+                <!-- Theme Toggle -->
+                <button class="btn btn-link p-0 text-dark" id="themeToggle">
+                    <i class="fas fa-moon fs-5"></i>
+                </button>
+                <!-- Profile -->
+                <div class="dropdown">
+                    <button class="btn btn-link p-0" data-bs-toggle="dropdown">
+                        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=32&h=32" 
+                             alt="Profile" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar Overlay -->
+    <div class="overlay position-fixed w-100 h-100" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar position-fixed h-100 bg-dark text-white" style="width: 280px; top: 0; left: 0;" id="sidebar">
+        <div class="p-3 border-bottom border-secondary">
+            <div class="d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Chat History</h5>
+                <button class="btn btn-link text-white p-0" id="newChatBtn">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="p-3">
+            <div class="mb-3">
+                <small class="text-muted text-uppercase fw-semibold">Today</small>
+            </div>
+            
+            <!-- Chat History Items -->
+            <div class="chat-item p-2 mb-2 rounded cursor-pointer" data-mock="true">
+                <div class="small fw-medium">Web Development Tips</div>
+                <div class="text-muted" style="font-size: 0.75rem;">2 hours ago</div>
+            </div>
+            
+            <div class="chat-item p-2 mb-2 rounded cursor-pointer" data-mock="true">
+                <div class="small fw-medium">Recipe Suggestions</div>
+                <div class="text-muted" style="font-size: 0.75rem;">4 hours ago</div>
+            </div>
+            
+            <div class="mb-3 mt-4">
+                <small class="text-muted text-uppercase fw-semibold">Yesterday</small>
+            </div>
+            
+            <div class="chat-item p-2 mb-2 rounded cursor-pointer" data-mock="true">
+                <div class="small fw-medium">JavaScript Frameworks</div>
+                <div class="text-muted" style="font-size: 0.75rem;">1 day ago</div>
+            </div>
+            
+            <div class="chat-item p-2 mb-2 rounded cursor-pointer" data-mock="true">
+                <div class="small fw-medium">Travel Planning Help</div>
+                <div class="text-muted" style="font-size: 0.75rem;">1 day ago</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container d-flex flex-column">
+        <!-- Messages Area -->
+        <div class="messages-container flex-grow-1 p-3" id="messagesContainer">
+            <!-- Welcome Message -->
+            <div class="text-center my-5" id="welcomeSection">
+                <div class="mb-4">
+                    <div class="bg-chat-green text-white rounded-circle d-inline-flex align-items-center justify-content-center" 
+                         style="width: 60px; height: 60px;">
+                        <i class="fas fa-robot fs-3"></i>
+                    </div>
+                </div>
+                <h3 class="h4 fw-semibold mb-3">How can I help you today?</h3>
+                <p class="text-muted mb-4">Start a conversation, ask questions, or request image generation</p>
+                
+                <!-- Quick Actions -->
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <button class="btn btn-outline-primary w-100 py-3 quick-action" data-prompt="Explain quantum computing in simple terms">
+                            <i class="fas fa-atom mb-2 d-block"></i>
+                            <small>Explain Concepts</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-outline-success w-100 py-3 quick-action" data-prompt="Generate an image of a serene mountain landscape">
+                            <i class="fas fa-image mb-2 d-block"></i>
+                            <small>Generate Images</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-outline-warning w-100 py-3 quick-action" data-prompt="Help me write a professional email">
+                            <i class="fas fa-pen mb-2 d-block"></i>
+                            <small>Write Content</small>
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-outline-info w-100 py-3 quick-action" data-prompt="What's the latest in technology news?">
+                            <i class="fas fa-newspaper mb-2 d-block"></i>
+                            <small>Get Updates</small>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Conversation -->
+            <div class="d-none" id="conversationArea">
+                <!-- User Message Example -->
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="message-bubble user-message p-3">
+                        <div data-bind="message.text">What are the benefits of using React hooks?</div>
+                        <div class="small opacity-75 mt-1" data-bind="message.timestamp">2:34 PM</div>
+                    </div>
+                </div>
+
+                <!-- AI Response Example -->
+                <div class="d-flex mb-3">
+                    <div class="me-2 mt-1">
+                        <div class="bg-chat-green text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 30px; height: 30px;">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                    <div class="message-bubble ai-message p-3">
+                        <div data-bind="message.text">
+                            React hooks offer several key benefits:
+
+                            **1. Simplified State Management**
+                            - Use useState for local component state
+                            - No need for class components
+
+                            **2. Reusable Logic**
+                            - Custom hooks allow sharing stateful logic
+                            - Better code organization
+
+                            **3. Better Performance**
+                            - useCallback and useMemo for optimization
+                            - Prevents unnecessary re-renders
+
+                            **4. Cleaner Code**
+                            - Functional components are more concise
+                            - Easier to test and debug
+
+                            Would you like me to explain any specific hook in detail?
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <div class="small text-muted" data-bind="message.timestamp">2:34 PM</div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-link p-1 text-muted">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link p-1 text-muted">
+                                    <i class="fas fa-thumbs-up"></i>
+                                </button>
+                                <button class="btn btn-sm btn-link p-1 text-muted">
+                                    <i class="fas fa-thumbs-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Generation Example -->
+                <div class="d-flex justify-content-end mb-3">
+                    <div class="message-bubble user-message p-3">
+                        <div>Generate an image of a cyberpunk cityscape at night</div>
+                        <div class="small opacity-75 mt-1">2:36 PM</div>
+                    </div>
+                </div>
+
+                <div class="d-flex mb-3">
+                    <div class="me-2 mt-1">
+                        <div class="bg-chat-green text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 30px; height: 30px;">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                    <div class="message-bubble ai-message p-3">
+                        <div class="mb-3">I've generated a cyberpunk cityscape image for you:</div>
+                        <!-- AI-generated image of a neon-lit cyberpunk cityscape with tall buildings and futuristic elements -->
+                        <img src="https://pixabay.com/get/g88f76a826fb7481c07b1d4d7832eed4214dfe981ac0131a52fa823e64b898ee733270b7ee90008d744ab09303ed80f71062971b499345238710e24dcbd28be4b_1280.jpg" 
+                             alt="Cyberpunk cityscape at night" class="generated-image mb-2" data-mock-image="true">
+                        <div class="small text-muted">Generated with AI • 2:36 PM</div>
+                    </div>
+                </div>
+
+                <!-- Typing Indicator -->
+                <div class="d-flex mb-3" id="typingIndicator" style="display: none !important;">
+                    <div class="me-2 mt-1">
+                        <div class="bg-chat-green text-white rounded-circle d-flex align-items-center justify-content-center" 
+                             style="width: 30px; height: 30px;">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                    </div>
+                    <div class="typing-indicator">
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container p-3">
+            <div class="d-flex align-items-end gap-2">
+                <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#attachModal">
+                    <i class="fas fa-paperclip"></i>
+                </button>
+                <div class="flex-grow-1">
+                    <textarea class="form-control border-0 bg-light" 
+                              id="messageInput" 
+                              placeholder="Message ChatAI..." 
+                              rows="1" 
+                              style="resize: none; max-height: 120px;"
+                              data-implementation="Auto-resize textarea based on content"></textarea>
+                </div>
+                <button class="send-button text-white d-flex align-items-center justify-content-center" 
+                        id="sendButton"
+                        data-event="click:handleSendMessage">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <div class="small text-muted text-center mt-2">
+                ChatAI can make mistakes. Consider checking important information.
+            </div>
+        </div>
+    </div>
+
+    <!-- Attachment Modal -->
+    <div class="modal fade" id="attachModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Attachment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <button class="btn btn-outline-primary w-100 py-4" data-action="upload-image">
+                                <i class="fas fa-image fs-2 mb-2 d-block"></i>
+                                <div>Upload Image</div>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-success w-100 py-4" data-action="upload-document">
+                                <i class="fas fa-file-alt fs-2 mb-2 d-block"></i>
+                                <div>Upload Document</div>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-warning w-100 py-4" data-action="take-photo">
+                                <i class="fas fa-camera fs-2 mb-2 d-block"></i>
+                                <div>Take Photo</div>
+                            </button>
+                        </div>
+                        <div class="col-6">
+                            <button class="btn btn-outline-info w-100 py-4" data-action="voice-message">
+                                <i class="fas fa-microphone fs-2 mb-2 d-block"></i>
+                                <div>Voice Message</div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong class="me-auto">Error</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                Something went wrong. Please try again.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize app
+        (function() {
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const welcomeSection = document.getElementById('welcomeSection');
+            const conversationArea = document.getElementById('conversationArea');
+            const newChatBtn = document.getElementById('newChatBtn');
+            const themeToggle = document.getElementById('themeToggle');
+            
+            // Sidebar functionality
+            function toggleSidebar() {
+                sidebar.classList.toggle('show');
+                sidebarOverlay.classList.toggle('show');
+            }
+            
+            sidebarToggle.addEventListener('click', toggleSidebar);
+            sidebarOverlay.addEventListener('click', toggleSidebar);
+            
+            // Message input auto-resize
+            messageInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+            });
+            
+            // Send message on Enter (without Shift)
+            messageInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            // Send button click
+            sendButton.addEventListener('click', sendMessage);
+            
+            // Quick action buttons
+            document.querySelectorAll('.quick-action').forEach(button => {
+                button.addEventListener('click', function() {
+                    const prompt = this.getAttribute('data-prompt');
+                    messageInput.value = prompt;
+                    sendMessage();
+                });
+            });
+            
+            // New chat functionality
+            newChatBtn.addEventListener('click', function() {
+                conversationArea.classList.add('d-none');
+                welcomeSection.classList.remove('d-none');
+                messageInput.value = '';
+                toggleSidebar();
+            });
+            
+            // Theme toggle
+            let isDarkMode = false;
+            themeToggle.addEventListener('click', function() {
+                isDarkMode = !isDarkMode;
+                document.body.classList.toggle('bg-dark', isDarkMode);
+                document.body.classList.toggle('text-white', isDarkMode);
+                
+                const icon = this.querySelector('i');
+                icon.className = isDarkMode ? 'fas fa-sun fs-5' : 'fas fa-moon fs-5';
+                
+                // TODO: Implement full dark mode styling
+            });
+            
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (!message) return;
+                
+                // Hide welcome section and show conversation
+                welcomeSection.classList.add('d-none');
+                conversationArea.classList.remove('d-none');
+                
+                // TODO: Implement actual message sending logic
+                // This would involve:
+                // 1. Adding user message to conversation
+                // 2. Calling TRPC API to send to Gemini
+                // 3. Handling streaming response
+                // 4. Saving to Supabase database
+                // 5. Error handling
+                
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            function showError(message) {
+                document.getElementById('errorMessage').textContent = message;
+                const toast = new bootstrap.Toast(document.getElementById('errorToast'));
+                toast.show();
+            }
+            
+            // TODO: Implement WebSocket connection for real-time updates
+            // TODO: Implement image generation handling
+            // TODO: Implement voice message recording
+            // TODO: Implement file upload functionality
+            // TODO: Add proper error handling for API failures
+            // TODO: Implement message persistence and loading from Supabase
+            // TODO: Add authentication state management
+            // TODO: Implement conversation history management
+        })();
+    </script>
+</body>
+</html>

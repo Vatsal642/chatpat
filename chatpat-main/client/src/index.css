@@ -1,0 +1,284 @@
+@import url('https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0 0% 100%);
+  --foreground: hsl(210 25% 7.8431%);
+  --card: hsl(180 6.6667% 97.0588%);
+  --card-foreground: hsl(210 25% 7.8431%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(210 25% 7.8431%);
+  --primary: hsl(203.8863 88.2845% 53.1373%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(210 25% 7.8431%);
+  --secondary-foreground: hsl(0 0% 100%);
+  --muted: hsl(240 1.9608% 90%);
+  --muted-foreground: hsl(210 25% 7.8431%);
+  --accent: hsl(211.5789 51.3514% 92.7451%);
+  --accent-foreground: hsl(203.8863 88.2845% 53.1373%);
+  --destructive: hsl(356.3033 90.5579% 54.3137%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --border: hsl(201.4286 30.4348% 90.9804%);
+  --input: hsl(200 23.0769% 97.4510%);
+  --ring: hsl(202.8169 89.1213% 53.1373%);
+  --chart-1: hsl(203.8863 88.2845% 53.1373%);
+  --chart-2: hsl(159.7826 100% 36.0784%);
+  --chart-3: hsl(42.0290 92.8251% 56.2745%);
+  --chart-4: hsl(147.1429 78.5047% 41.9608%);
+  --chart-5: hsl(341.4894 75.2000% 50.9804%);
+  --sidebar: hsl(180 6.6667% 97.0588%);
+  --sidebar-foreground: hsl(210 25% 7.8431%);
+  --sidebar-primary: hsl(203.8863 88.2845% 53.1373%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(211.5789 51.3514% 92.7451%);
+  --sidebar-accent-foreground: hsl(203.8863 88.2845% 53.1373%);
+  --sidebar-border: hsl(205.0000 25.0000% 90.5882%);
+  --sidebar-ring: hsl(202.8169 89.1213% 53.1373%);
+  --font-sans: Inter, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
+  --radius: 1.3rem;
+  --chat-green: hsl(158 64% 35%);
+  --chat-dark: hsl(220 14% 20%);
+  --chat-light: hsl(240 5% 97%);
+  --user-bg: hsl(207 90% 90%);
+  --ai-bg: hsl(240 5% 97%);
+}
+
+.dark {
+  --background: hsl(220 14% 8%);
+  --foreground: hsl(210 40% 98%);
+  --card: hsl(220 14% 10%);
+  --card-foreground: hsl(210 40% 98%);
+  --popover: hsl(220 14% 8%);
+  --popover-foreground: hsl(210 40% 98%);
+  --primary: hsl(203.8863 88.2845% 53.1373%);
+  --primary-foreground: hsl(0 0% 100%);
+  --secondary: hsl(220 14% 15%);
+  --secondary-foreground: hsl(210 40% 98%);
+  --muted: hsl(220 14% 15%);
+  --muted-foreground: hsl(220 10% 50%);
+  --accent: hsl(220 14% 15%);
+  --accent-foreground: hsl(210 40% 98%);
+  --destructive: hsl(0 84% 60%);
+  --destructive-foreground: hsl(210 40% 98%);
+  --border: hsl(220 14% 20%);
+  --input: hsl(220 14% 15%);
+  --ring: hsl(203.8863 88.2845% 53.1373%);
+  --sidebar: hsl(220 14% 10%);
+  --sidebar-foreground: hsl(210 40% 98%);
+  --sidebar-primary: hsl(203.8863 88.2845% 53.1373%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 14% 15%);
+  --sidebar-accent-foreground: hsl(210 40% 98%);
+  --sidebar-border: hsl(220 14% 20%);
+  --sidebar-ring: hsl(203.8863 88.2845% 53.1373%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Chat-specific styles */
+.chat-container {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.messages-container {
+  height: calc(100vh - 140px);
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.message-bubble {
+  max-width: 85%;
+  word-wrap: break-word;
+}
+
+.user-message {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-left: auto;
+  border-radius: 18px 18px 4px 18px;
+}
+
+.ai-message {
+  border-radius: 18px 18px 18px 4px;
+}
+
+.typing-indicator {
+  border-radius: 18px;
+  padding: 12px 16px;
+  margin: 8px 0;
+  max-width: 80px;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 4px;
+}
+
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: typingDot 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typingDot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.3s ease-out;
+}
+
+.input-container {
+  backdrop-filter: blur(10px);
+}
+
+.send-button {
+  transition: all 0.2s ease;
+}
+
+.send-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.sidebar {
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+.sidebar.show {
+  transform: translateX(0);
+}
+
+.overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.overlay.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.chat-item {
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.generated-image {
+  max-width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Bootstrap integration with dark mode */
+.dark .dropdown-menu {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border));
+}
+
+.dark .dropdown-item {
+  color: hsl(var(--card-foreground));
+}
+
+.dark .dropdown-item:hover {
+  background-color: hsl(var(--muted));
+}
+
+.dark .form-control {
+  background-color: hsl(var(--input));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark .form-control:focus {
+  background-color: hsl(var(--input));
+  border-color: hsl(var(--ring));
+  color: hsl(var(--foreground));
+  box-shadow: 0 0 0 0.25rem rgba(var(--ring), 0.25);
+}
+
+.btn-outline-primary {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.btn-outline-primary:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-outline-success {
+  color: hsl(var(--chart-2));
+  border-color: hsl(var(--chart-2));
+}
+
+.btn-outline-success:hover {
+  background-color: hsl(var(--chart-2));
+  color: white;
+}
+
+.btn-outline-warning {
+  color: hsl(var(--chart-3));
+  border-color: hsl(var(--chart-3));
+}
+
+.btn-outline-warning:hover {
+  background-color: hsl(var(--chart-3));
+  color: white;
+}
+
+.btn-outline-info {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.btn-outline-info:hover {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.btn-outline-secondary {
+  color: hsl(var(--muted-foreground));
+  border-color: hsl(var(--border));
+}
+
+.btn-outline-secondary:hover {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--foreground));
+}
