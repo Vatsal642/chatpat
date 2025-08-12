@@ -21,3 +21,14 @@ create table if not exists public.messages (
 
 -- Indexes
 create index if not exists messages_conversation_id_idx on public.messages(conversation_id);
+
+-- Storage: public uploads bucket
+insert into storage.buckets (id, name, public)
+values ('uploads', 'uploads', true)
+on conflict (id) do nothing;
+
+-- Public read policy for uploads bucket (write via server using service role)
+create policy if not exists "Public read access to uploads"
+  on storage.objects
+  for select
+  using (bucket_id = 'uploads');
