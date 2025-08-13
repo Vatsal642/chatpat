@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import * as client from "openid-client";
 import { Strategy, type VerifyFunction } from "openid-client/passport";
 
@@ -6,6 +7,7 @@ import session from "express-session";
 import type { Express, RequestHandler } from "express";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
+import createMemoryStore from "memorystore";
 import { storage } from "./storage";
 
 if (!process.env.REPLIT_DOMAINS && process.env.AUTH_MODE !== "dev") {
@@ -25,12 +27,20 @@ const getOidcConfig = memoize(
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+
+  let sessionStore: session.Store;
+  if (process.env.AUTH_MODE === "dev") {
+    const MemoryStore = createMemoryStore(session);
+    sessionStore = new MemoryStore({ checkPeriod: sessionTtl });
+  } else {
+    sessionStore = new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: false,
+      ttl: sessionTtl,
+      tableName: "sessions",
+    });
+  }
+
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -82,7 +92,8 @@ export async function setupAuth(app: Express) {
       };
       req.user = { claims: devClaims, expires_at: Math.floor(Date.now() / 1000) + 7 * 24 * 3600 };
       req.isAuthenticated = () => true;
-      upsertUser(devClaims).finally(() => next());
+      // Avoid DB access in dev to prevent crashes if DATABASE_URL is unreachable
+      next();
     });
 
     // No-op login/logout to make the UI happy in dev
