@@ -11,10 +11,13 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Env
+# Environment files
 .env
 .env.local
 .env.*.local
+
+# Local secret directory
+.local/
 
 # OS/Editor
 .DS_Store

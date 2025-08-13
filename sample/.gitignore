@@ -1,8 +1,7 @@
-node_modules
-.next
+# Environment files
 .env
 .env.*
 !.env.example
-coverage
-.vercel
-.out
+
+# Local secret directory
+.local/
