@@ -8,6 +8,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import type { Conversation, Message, User } from "@shared/schema";
+import { Menu, Sun, Moon, Send, Bot } from "lucide-react";
 
 export default function ChatInterface() {
   const { user } = useAuth() as { user: User | undefined };
@@ -199,18 +200,20 @@ export default function ChatInterface() {
       <header className="bg-card border-b border-border sticky top-0 z-40">
         <div className="flex items-center justify-between p-3">
           <button 
-            className="btn btn-link p-0 text-foreground"
+            className="p-2 rounded hover:bg-muted text-foreground"
             onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
           >
-            <i className="fas fa-bars text-lg"></i>
+            <Menu className="w-5 h-5" />
           </button>
           <h1 className="text-lg font-semibold">ChatAI</h1>
           <div className="flex items-center gap-2">
             <button 
-              className="btn btn-link p-0 text-foreground"
+              className="p-2 rounded hover:bg-muted text-foreground"
               onClick={toggleTheme}
+              aria-label="Toggle theme"
             >
-              <i className={`fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'} text-lg`}></i>
+              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
             <div className="dropdown">
               <button className="btn btn-link p-0" data-bs-toggle="dropdown">
@@ -223,7 +226,7 @@ export default function ChatInterface() {
               <ul className="dropdown-menu dropdown-menu-end bg-card border-border">
                 <li><span className="dropdown-item-text px-3 py-2 text-sm">{user?.email}</span></li>
                 <li><hr className="dropdown-divider border-border" /></li>
-                <li><a className="dropdown-item text-foreground" href="/api/logout"><i className="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                <li><a className="dropdown-item text-foreground" href="/api/logout">Logout</a></li>
               </ul>
             </div>
           </div>
@@ -246,7 +249,7 @@ export default function ChatInterface() {
           <div className="text-center my-5">
             <div className="mb-4">
               <div className="bg-primary text-primary-foreground rounded-full w-15 h-15 inline-flex items-center justify-center">
-                <i className="fas fa-robot text-2xl"></i>
+                <Bot className="w-6 h-6" />
               </div>
             </div>
             <h3 className="text-xl font-semibold mb-3">How can I help you today?</h3>
@@ -275,7 +278,7 @@ export default function ChatInterface() {
               <div className="flex mb-3">
                 <div className="me-2 mt-1">
                   <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
-                    <i className="fas fa-robot text-sm"></i>
+                    <Bot className="w-4 h-4" />
                   </div>
                 </div>
                 <div className="typing-indicator bg-muted rounded-lg p-3">
@@ -312,8 +315,9 @@ export default function ChatInterface() {
             className="send-button bg-primary text-primary-foreground border-0 w-11 h-11 rounded-full flex items-center justify-center hover:scale-110 transition-transform"
             onClick={handleSendMessage}
             disabled={!message.trim() || sendMessageMutation.isPending}
+            aria-label="Send message"
           >
-            <i className="fas fa-paper-plane"></i>
+            <Send className="w-4 h-4" />
           </button>
         </div>
         <div className="text-xs text-muted-foreground text-center mt-2">

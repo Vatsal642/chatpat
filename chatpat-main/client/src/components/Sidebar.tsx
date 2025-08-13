@@ -4,6 +4,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { Conversation } from "@shared/schema";
+import { Plus, Trash2, MessageSquareText } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -116,8 +117,9 @@ export default function Sidebar({
               className="btn btn-link text-card-foreground p-0"
               onClick={onNewChat}
               title="New Chat"
+              aria-label="New chat"
             >
-              <i className="fas fa-plus"></i>
+              <Plus className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -125,7 +127,7 @@ export default function Sidebar({
         <div className="p-3 overflow-y-auto" style={{ height: "calc(100vh - 80px)" }}>
           {Object.entries(groupedConversations).length === 0 ? (
             <div className="text-center text-muted-foreground py-8">
-              <i className="fas fa-comments text-2xl mb-2 block"></i>
+              <MessageSquareText className="w-6 h-6 mb-2 inline-block" />
               <p className="text-sm">No conversations yet</p>
               <p className="text-xs">Start a new chat to begin</p>
             </div>
@@ -165,8 +167,9 @@ export default function Sidebar({
                           deleteConversationMutation.mutate(conversation.id);
                         }}
                         title="Delete conversation"
+                        aria-label="Delete conversation"
                       >
-                        <i className="fas fa-trash text-xs"></i>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
