@@ -39,11 +39,16 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className="flex mb-3">
       <div className="me-2 mt-1">
-        <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
+        <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center shadow-[0_0_18px_rgba(51,153,255,0.35)]">
           <Bot className="w-4 h-4" />
         </div>
       </div>
-      <div className="message-bubble ai-message bg-muted border border-border p-3 rounded-lg max-w-xs md:max-w-md animate-fadeInUp">
+      <div className="message-bubble ai-message bg-muted border border-border p-3 rounded-lg max-w-xs md:max-w-md animate-fadeInUp relative">
+        <div className="pointer-events-none absolute inset-0 rounded-lg" style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.06))',
+          maskImage: 'linear-gradient(black, black)',
+          WebkitMaskImage: 'linear-gradient(black, black)'
+        }} />
         <div className="whitespace-pre-wrap">{message.content}</div>
         
         {message.imageUrl && (

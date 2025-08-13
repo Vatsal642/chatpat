@@ -9,6 +9,7 @@ import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import type { Conversation, Message, User } from "@shared/schema";
 import { Menu, Sun, Moon, Send, Bot, Sparkles, Image as ImageIcon, PenLine, Newspaper } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ChatInterface() {
   const { user } = useAuth() as { user: User | undefined };
@@ -31,7 +32,7 @@ export default function ChatInterface() {
   });
 
   // Fetch messages for current conversation
-  const { data: messages = [] } = useQuery<Message[]>({
+  const { data: messages = [], isPending: isMessagesPending } = useQuery<Message[]>({
     queryKey: ["/api/conversations", currentConversationId, "messages"],
     enabled: !!currentConversationId,
   });
@@ -268,6 +269,20 @@ export default function ChatInterface() {
               ))}
             </div>
           </div>
+        ) : (isMessagesPending && messages.length === 0) ? (
+          <div className="space-y-4">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex items-start gap-2">
+                <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center opacity-80">
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/2 rounded-lg" />
+                  <Skeleton className="h-4 w-2/3 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <div>
             {messages.map((msg) => (
@@ -277,11 +292,11 @@ export default function ChatInterface() {
             {isTyping && (
               <div className="flex mb-3">
                 <div className="me-2 mt-1">
-                  <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
+                  <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center shadow-[0_0_18px_rgba(51,153,255,0.35)]">
                     <Bot className="w-4 h-4" />
                   </div>
                 </div>
-                <div className="typing-indicator bg-muted rounded-lg p-3">
+                <div className="typing-indicator rounded-lg p-3 bg-gradient-to-br from-accent/60 to-card shadow-inner">
                   <div className="typing-dots flex gap-1">
                     <div className="typing-dot bg-muted-foreground"></div>
                     <div className="typing-dot bg-muted-foreground"></div>

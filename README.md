@@ -17,6 +17,29 @@ A full‑stack AI chatbot built with Express, Vite, React (TypeScript), Tailwind
 
 The app you should run is in `chatpat-main/`.
 
+## Run it like you’re 3 years old (super simple)
+
+- Step 1: Install Node.js 20+ from the official site.
+- Step 2: Open your terminal.
+- Step 3: Type these commands, one line at a time:
+
+```bash
+cd chatpat-main
+npm install
+cp .env.example .env
+# Open .env in any editor and fill:
+# - DATABASE_URL (Postgres URL)
+# - GEMINI_API_KEY (or GOOGLE_AI_API_KEY)
+# For local: set AUTH_MODE=dev
+npm run db:push
+npm run dev
+```
+
+- Step 4: Open your browser to http://localhost:5000
+- Step 5: Type a message. That’s it.
+
+If something breaks, read “Troubleshooting” near the end.
+
 ## Prerequisites
 - Node.js 20+
 - A Postgres database (Neon, Supabase, or any managed Postgres)
@@ -103,21 +126,36 @@ Static files are emitted to `dist/public`. The API is `dist/index.js`.
 - Theme tokens and custom styles in `chatpat-main/client/src/index.css`
 - Reusable UI primitives in `chatpat-main/client/src/components/ui` (shadcn/ui)
 
-The UI includes Aceternity‑style gradients, glass effects, and refreshed icons (via `lucide-react`) for an attractive, modern feel. Tweak tokens in `index.css` to adjust brand colors.
+The UI includes Aceternity‑style accents: gradient header stripe in the sidebar, glowing bot avatar, gradient typing indicator, and message shimmer. Icons use `lucide-react`.
+
+Note: Unused `react-icons` dependency has been removed.
 
 ## Next.js samples (optional)
-- Run the monorepo‑aligned sample:
+
+- Newer sample (monorepo‑aligned):
 
 ```bash
 cd chatpat-main/sample
 npm install
+cp .env.example .env
+# Fill Auth0, Supabase, and Gemini keys as described in this sample’s README
 npm run dev
 ```
 
-- The legacy `/sample` folder can be run similarly but is not required for the main app.
+- Older sample (legacy):
+
+```bash
+cd sample
+npm install
+# Create .env.local; see sample/docs/LOCAL_SETUP.md for all variables
+npm run dev
+```
+
+The newer `chatpat-main/sample` is recommended. The legacy `/sample` is kept for comparison and learning.
 
 ## Troubleshooting
 - Missing DB: ensure `DATABASE_URL` points to a live Postgres and run `npm run db:push`
 - 401 Unauthorized on localhost: set `AUTH_MODE=dev` in `chatpat-main/.env`
 - Port blocked: set `PORT=5000` (or another free port)
 - Missing Gemini key: set `GEMINI_API_KEY` (or `GOOGLE_AI_API_KEY`)
+- Styles not showing: restart dev server after changing Tailwind config

@@ -110,11 +110,14 @@ export default function Sidebar({
         }`}
         style={{ width: "280px", top: 0, left: 0 }}
       >
-        <div className="p-3 border-b border-border">
+        <div className="relative p-3 border-b border-border/60 bg-gradient-to-br from-card to-accent/20">
+          <div className="absolute left-3 right-3 -top-[2px]">
+            <div className="h-1 rounded-full bg-gradient-to-r from-primary via-accent to-primary" />
+          </div>
           <div className="flex items-center justify-between">
-            <h5 className="text-lg font-semibold">Chat History</h5>
+            <h5 className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-primary to-foreground">Chat History</h5>
             <button 
-              className="btn btn-link text-card-foreground p-0"
+              className="inline-flex items-center justify-center rounded-md px-2 py-1 text-card-foreground transition hover:scale-105 bg-sidebar-accent/40 hover:bg-sidebar-accent/60 focus:outline-none"
               onClick={onNewChat}
               title="New Chat"
               aria-label="New chat"
