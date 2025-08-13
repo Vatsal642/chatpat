@@ -6,9 +6,9 @@ const localEnvPath = path.resolve(process.cwd(), ".local", ".env");
 const rootEnvPath = path.resolve(process.cwd(), ".env");
 const envPath = existsSync(localEnvPath) ? localEnvPath : rootEnvPath;
 if (existsSync(envPath)) {
-	dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath });
 } else {
-	dotenv.config();
+  dotenv.config();
 }
 import { defineConfig } from "drizzle-kit";
 

@@ -7,11 +7,11 @@ const localEnvPath = path.resolve(cwd, ".local", ".env");
 const rootEnvPath = path.resolve(cwd, ".env");
 
 const envPath = existsSync(localEnvPath)
-	? localEnvPath
-	: rootEnvPath;
+  ? localEnvPath
+  : rootEnvPath;
 
 if (existsSync(envPath)) {
-	dotenv.config({ path: envPath });
+  dotenv.config({ path: envPath });
 } else {
-	dotenv.config();
+  dotenv.config();
 }
