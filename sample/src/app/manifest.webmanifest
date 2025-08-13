@@ -1,0 +1,8 @@
+{
+  "name": "Sample Mobile Chat",
+  "short_name": "Chat",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd"
+}
