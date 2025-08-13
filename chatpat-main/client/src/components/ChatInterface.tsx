@@ -8,7 +8,7 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import Sidebar from "@/components/Sidebar";
 import MessageBubble from "@/components/MessageBubble";
 import type { Conversation, Message, User } from "@shared/schema";
-import { Menu, Sun, Moon, Send, Bot } from "lucide-react";
+import { Menu, Sun, Moon, Send, Bot, Sparkles, Image as ImageIcon, PenLine, Newspaper } from "lucide-react";
 
 export default function ChatInterface() {
   const { user } = useAuth() as { user: User | undefined };
@@ -173,22 +173,22 @@ export default function ChatInterface() {
 
   const quickActions = [
     {
-      icon: "fas fa-atom",
+      Icon: Sparkles,
       label: "Explain Concepts",
       prompt: "Explain quantum computing in simple terms"
     },
     {
-      icon: "fas fa-image",
+      Icon: ImageIcon,
       label: "Generate Images",
       prompt: "Generate an image of a serene mountain landscape"
     },
     {
-      icon: "fas fa-pen",
+      Icon: PenLine,
       label: "Write Content",
       prompt: "Help me write a professional email"
     },
     {
-      icon: "fas fa-newspaper",
+      Icon: Newspaper,
       label: "Get Updates",
       prompt: "What's the latest in technology news?"
     }
@@ -262,7 +262,7 @@ export default function ChatInterface() {
                   className="btn btn-outline-primary py-3 text-center"
                   onClick={() => setMessage(action.prompt)}
                 >
-                  <i className={`${action.icon} mb-1 block`}></i>
+                  <action.Icon className="w-4 h-4 mb-1 block" />
                   <small>{action.label}</small>
                 </button>
               ))}
