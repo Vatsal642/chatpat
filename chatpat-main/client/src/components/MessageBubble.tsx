@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import type { Message } from "@shared/schema";
+import { Bot, Copy, Check } from "lucide-react";
 
 interface MessageBubbleProps {
   message: Message;
@@ -39,7 +40,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
     <div className="flex mb-3">
       <div className="me-2 mt-1">
         <div className="bg-primary text-primary-foreground rounded-full w-8 h-8 flex items-center justify-center">
-          <i className="fas fa-robot text-sm"></i>
+          <Bot className="w-4 h-4" />
         </div>
       </div>
       <div className="message-bubble ai-message bg-muted border border-border p-3 rounded-lg max-w-xs md:max-w-md animate-fadeInUp">
@@ -63,7 +64,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               onClick={copyToClipboard}
               title={copied ? "Copied!" : "Copy message"}
             >
-              <i className={`fas ${copied ? 'fa-check' : 'fa-copy'} text-xs`}></i>
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
           </div>
         </div>

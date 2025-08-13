@@ -8,7 +8,7 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
+if (!process.env.REPLIT_DOMAINS && process.env.AUTH_MODE !== "dev") {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
@@ -38,7 +38,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === "production" || process.env.COOKIE_SECURE === "true",
       maxAge: sessionTtl,
     },
   });
@@ -68,6 +68,29 @@ async function upsertUser(
 
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
+
+  // Development auth mode: bypass OIDC and attach a dev user
+  if (process.env.AUTH_MODE === "dev") {
+    app.use(getSession());
+    app.use((req: any, _res, next) => {
+      const devClaims = {
+        sub: "dev-user",
+        email: "dev@example.com",
+        first_name: "Dev",
+        last_name: "User",
+        profile_image_url: "",
+      };
+      req.user = { claims: devClaims, expires_at: Math.floor(Date.now() / 1000) + 7 * 24 * 3600 };
+      req.isAuthenticated = () => true;
+      upsertUser(devClaims).finally(() => next());
+    });
+
+    // No-op login/logout to make the UI happy in dev
+    app.get("/api/login", (_req, res) => res.redirect("/"));
+    app.get("/api/logout", (_req, res) => res.redirect("/"));
+    return;
+  }
+
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -128,6 +151,10 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (process.env.AUTH_MODE === "dev") {
+    return next();
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
